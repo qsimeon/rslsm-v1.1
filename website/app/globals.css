@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-inter: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-jetbrains-mono: 'JetBrains Mono', monospace;
+  }
+
+  * {
+    @apply border-gray-800;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply min-h-screen;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-sans font-semibold tracking-tight;
+  }
+
+  code {
+    @apply font-mono text-sm;
+  }
+}
+
+@layer components {
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .btn-primary {
+    @apply px-6 py-3 bg-cyan hover:bg-cyan-hover text-primary-bg font-semibold rounded-lg transition-colors duration-200;
+  }
+
+  .btn-secondary {
+    @apply px-6 py-3 bg-primary-surface hover:bg-primary-accent text-text-light font-semibold rounded-lg border border-primary-accent transition-colors duration-200;
+  }
+
+  .card {
+    @apply bg-primary-surface rounded-lg border border-gray-800 p-6 shadow-lg;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-primary-bg;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-primary-accent rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-cyan;
+}

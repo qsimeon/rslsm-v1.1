@@ -1,0 +1,387 @@
+================================================================================
+DIRECTORY STRUCTURE TEMPLATE FOR rsLSM REBUILD BLOG
+================================================================================
+
+This file shows the exact folder structure you need to create when preparing
+assets for the website build.
+
+================================================================================
+ROOT DIRECTORY: /Users/quileesimeon/blog-rsLSM/
+================================================================================
+
+blog-rsLSM/
+│
+├─ 📄 PLANNING & DOCS
+│  ├─ README-BLOG-PROJECT.md ............................ Quick reference guide
+│  ├─ WEBSITE-BUILD-PLAN.md ............................ Comprehensive spec
+│  ├─ CLAUDE-AI-BUILD-PROMPT.md ........................ Build instructions
+│  ├─ PLANNING-COMPLETE-SUMMARY.txt ................... This summary
+│  └─ DIRECTORY-STRUCTURE-TEMPLATE.txt ............... This file
+│
+├─ 📁 assets/ ......................................... [TO CREATE]
+│  │
+│  ├─ cad-renders/
+│  │  ├─ rsLSM-front-view.png ......................... Front ortho view
+│  │  ├─ rsLSM-side-view.png .......................... Side ortho view
+│  │  ├─ rsLSM-top-view.png ........................... Top ortho view
+│  │  ├─ rsLSM-isometric-45deg.png ................... 45° isometric view
+│  │  ├─ rsLSM-laser-module-closeup.png ............. Illumination path detail
+│  │  ├─ rsLSM-detector-closeup.png ................. Imaging path detail
+│  │  ├─ rsLSM-scanning-stage-closeup.png .......... Scanning system detail
+│  │  └─ rsLSM-exploded-assembly.png ................ Exploded view
+│  │  └─ [All files: PNG/JPEG, 1920x1080 min, 8 total]
+│  │
+│  ├─ photos/
+│  │  ├─ build-progress/
+│  │  │  ├─ IMG_8590.webp ........................... Build phase 1
+│  │  │  ├─ IMG_8591.webp
+│  │  │  ├─ IMG_8592.webp
+│  │  │  ├─ IMG_8613.webp ........................... Build phase 3
+│  │  │  ├─ IMG_8614.webp
+│  │  │  ├─ IMG_8615.webp
+│  │  │  ├─ IMG_8616.webp
+│  │  │  ├─ IMG_8617.webp
+│  │  │  ├─ IMG_8618.webp
+│  │  │  ├─ IMG_8619.webp
+│  │  │  ├─ IMG_8620.webp
+│  │  │  ├─ IMG_8621.webp
+│  │  │  └─ IMG_8622.webp ........................... Build phase 4
+│  │  │  └─ [30+ WebP files, <500KB each, from Inventory/build images/]
+│  │  │
+│  │  ├─ components/
+│  │  │  ├─ laser-module.webp
+│  │  │  ├─ scanning-stage.webp
+│  │  │  ├─ detector-assembly.webp
+│  │  │  └─ [5-8 component closeups]
+│  │  │
+│  │  ├─ assembly/
+│  │  │  ├─ final-system-front.webp
+│  │  │  ├─ final-system-side.webp
+│  │  │  ├─ final-system-top.webp
+│  │  │  └─ [3-5 final assembly photos]
+│  │  │
+│  │  ├─ gallery/
+│  │  │  ├─ hero-main-image.webp .................... Homepage hero
+│  │  │  ├─ hero-alternative.webp
+│  │  │  └─ [2-3 showcase images]
+│  │  │
+│  │  └─ [All: WebP format, <500KB each, 2000x1500px max]
+│  │
+│  ├─ videos/
+│  │  ├─ assembly-optical-path.mp4 .................. Phase 3 walkthrough
+│  │  ├─ assembly-optical-path-thumb.jpg
+│  │  ├─ assembly-detector-path.mp4 ................. Phase 4 walkthrough
+│  │  ├─ assembly-detector-path-thumb.jpg
+│  │  ├─ bom-overview.mp4 ........................... Component walkthrough
+│  │  ├─ bom-overview-thumb.jpg
+│  │  ├─ system-test-video.mp4 ..................... Final system test
+│  │  ├─ system-test-video-thumb.jpg
+│  │  ├─ team-overview.mp4 ......................... Team introduction
+│  │  ├─ team-overview-thumb.jpg
+│  │  └─ live-imaging-demo.mp4 ..................... Live imaging (if available)
+│  │  └─ [All: H.264 MP4, 1080p, <100MB each]
+│  │
+│  └─ documents/
+│     ├─ theses/
+│     │  ├─ wang-zgwang-PhD-MAS-2024-thesis.pdf
+│     │  └─ zeguan-updated-preprint.pdf
+│     ├─ proposals/
+│     │  ├─ quilee-thesis-proposal.pdf
+│     │  └─ google-zebrafish-grant.pdf
+│     ├─ presentations/
+│     │  ├─ boyden-lab-meeting-12-3.pdf
+│     │  └─ thesis-proposal-slides.pdf
+│     └─ schematics/
+│        └─ electronics-connection-diagram.pdf
+│
+├─ 📁 public/ ......................................... [TO CREATE]
+│  └─ data/
+│     ├─ bom.json .................................... 500+ parts with metadata
+│     ├─ timeline.json ............................... Project milestones
+│     ├─ photos.json .................................. Photo metadata
+│     ├─ videos.json .................................. Video metadata
+│     └─ components.json .............................. Key component specs
+│
+├─ 📁 content/ ......................................... [TO CREATE]
+│  │
+│  ├─ home.md
+│  │  └─ Front matter: title, description, featured image
+│  │     Body: Hero narrative, stats, motivation
+│  │
+│  ├─ phases/
+│  │  ├─ phase-0.md .................................. Understand original design
+│  │  │  └─ Front matter + body content
+│  │  ├─ phase-1.md .................................. CAD redesign & BOM
+│  │  │  └─ Front matter + step-by-step content
+│  │  ├─ phase-2.md .................................. Component sourcing
+│  │  │  └─ Vendor strategy, lead times, budget tracking
+│  │  ├─ phase-3.md .................................. Optical path assembly
+│  │  │  └─ Illumination subsystem build, photos, BOM items
+│  │  ├─ phase-4.md .................................. Imaging path assembly
+│  │  │  └─ Detection optics, alignment, integration
+│  │  └─ phase-5.md .................................. Electronics & software
+│  │     └─ Control systems, camera acquisition, integration
+│  │
+│  ├─ technical/
+│  │  ├─ article-1-optical-design.md ............... Photonics & light sheet
+│  │  │  └─ Theory, laser selection, optical path, filters
+│  │  ├─ article-2-remote-scanning.md ............. Scanning system design
+│  │  │  └─ Remote scanning theory, piezo control, scanning patterns
+│  │  ├─ article-3-camera-acquisition.md ......... Camera & data streaming
+│  │  │  └─ High-speed camera, acquisition, real-time processing
+│  │  ├─ article-4-electronics.md ................ Control & signal processing
+│  │  │  └─ Control architecture, laser regulation, synchronization
+│  │  └─ article-5-software.md ................... Firmware & control software
+│  │     └─ Software design, real-time control, calibration
+│  │
+│  └─ about.md
+│     └─ Team bios, acknowledgments, contact, citations
+│
+├─ 📁 src/ ............................................. [Created by Claude.ai]
+│  ├─ app/
+│  │  ├─ layout.tsx
+│  │  ├─ page.tsx (homepage)
+│  │  ├─ build-guide/
+│  │  ├─ bom/
+│  │  ├─ cad-gallery/
+│  │  ├─ timeline/
+│  │  ├─ resources/
+│  │  ├─ technical/
+│  │  └─ about/
+│  ├─ components/ (reusable UI)
+│  ├─ lib/ (utilities)
+│  └─ styles/ (global styles)
+│
+├─ 📁 public/ ........................................... [Created by Claude.ai]
+│  ├─ data/ (JSON data files)
+│  ├─ assets/ (all media)
+│  └─ documents/ (PDFs, reference docs)
+│
+├─ 📄 package.json ...................................... [Created by Claude.ai]
+├─ 📄 next.config.js .................................... [Created by Claude.ai]
+├─ 📄 tsconfig.json ..................................... [Created by Claude.ai]
+├─ 📄 tailwind.config.js ................................ [Created by Claude.ai]
+├─ 📄 .env.local ......................................... [Create before deploy]
+└─ 📁 .github/ ........................................... [Created by Claude.ai]
+   └─ workflows/ (deployment config)
+
+================================================================================
+FILE FORMAT SPECIFICATIONS
+================================================================================
+
+IMAGES:
+  CAD Renders:
+    - Format: PNG or JPEG (PNG preferred for transparency)
+    - Dimensions: 1920x1080 pixels minimum
+    - Files: 8 total (front, side, top, isometric, 3x closeups, exploded)
+    - Location: assets/cad-renders/
+
+  Photos (Build Progress):
+    - Format: WebP (80% smaller than JPEG)
+    - Dimensions: Max 2000x1500px
+    - File size: <500KB per image
+    - Files: 30+ from build images folder
+    - Location: assets/photos/build-progress/
+    - Keep JPEG backups for reference
+
+  Component Photos:
+    - Format: WebP
+    - Dimensions: Max 2000x1500px
+    - File size: <500KB
+    - Files: 5-8 closeups of key components
+    - Location: assets/photos/components/
+
+VIDEOS:
+  Format: H.264 codec, MP4 container
+  Resolution: 1920x1080 (1080p)
+  Bitrate: 3-5 Mbps
+  Framerate: 30fps
+  File size: <100MB per video
+  Files: 6-8 assembly walkthroughs
+  Location: assets/videos/
+  Also create .jpg thumbnails (1280x720)
+
+DATA FILES (JSON):
+  Format: Valid JSON
+  Charset: UTF-8
+  Location: public/data/
+  Files:
+    - bom.json (500+ parts)
+    - timeline.json (20+ events)
+    - photos.json (30+ photos)
+    - videos.json (6+ videos)
+    - components.json (10+ components)
+
+MARKDOWN FILES:
+  Format: GitHub-flavored Markdown
+  Charset: UTF-8
+  Front matter: YAML (title, description, date, image)
+  Location: content/
+  Files: 1 home + 6 phases + 5 technical + 1 about = 13 total
+
+================================================================================
+DATA STRUCTURE EXAMPLES
+================================================================================
+
+BOM.JSON STRUCTURE:
+{
+  "bom": [
+    {
+      "id": "OPT-001",
+      "partNumber": "MgF2-5050-UV",
+      "description": "MgF2 lens, 50mm diameter, UV coated",
+      "vendor": "Thorlabs",
+      "vendorPartNumber": "LB1437-UV",
+      "vendorUrl": "https://www.thorlabs.com/...",
+      "quantity": 1,
+      "cost": 1250.00,
+      "category": "optical",
+      "subcategory": "lens",
+      "status": "received",
+      "phase": [1, 2],
+      "orderDate": "2025-10-12",
+      "receiveDate": "2025-11-05",
+      "specs": {
+        "material": "MgF2",
+        "diameter": "50mm",
+        "focalLength": "50mm",
+        "wavelengthRange": "UV-VIS"
+      }
+    }
+  ],
+  "summary": {
+    "totalCost": 425000,
+    "totalItems": 542,
+    "byVendor": {
+      "Thorlabs": 125000,
+      "Edmund Optics": 85000,
+      "McMaster-Carr": 35000,
+      ...
+    },
+    "byCategory": {
+      "optical": 185000,
+      "mechanical": 145000,
+      "electrical": 95000
+    }
+  }
+}
+
+TIMELINE.JSON STRUCTURE:
+{
+  "events": [
+    {
+      "date": "2025-09-15",
+      "title": "Design review complete",
+      "description": "Final CAD design approved by team",
+      "type": "milestone",
+      "phase": 1,
+      "image": "/assets/photos/...",
+      "details": "..."
+    },
+    {
+      "date": "2025-10-12",
+      "title": "Orders placed",
+      "description": "Initial component orders from 5 vendors",
+      "type": "procurement",
+      "vendors": ["Thorlabs", "Edmund Optics", "McMaster-Carr"],
+      "value": 95000
+    }
+  ]
+}
+
+PHOTOS.JSON STRUCTURE:
+{
+  "photos": [
+    {
+      "id": "build-001",
+      "title": "Optical table assembly",
+      "description": "Initial mounting of optical components on vibration-isolated table",
+      "phase": 3,
+      "category": "optical",
+      "src": "/assets/photos/build-progress/IMG_8615.webp",
+      "thumbnail": "/assets/photos/build-progress/IMG_8615-thumb.webp",
+      "alt": "Photo of optical table with mounted components",
+      "date": "2025-12-15",
+      "author": "Quilee Simeon"
+    }
+  ]
+}
+
+================================================================================
+TOOLS & UTILITIES FOR FILE PREP
+================================================================================
+
+Image Processing:
+  ✓ ImageOptim (macOS, free) - batch image optimization
+  ✓ TinyPNG (online) - compress & convert to WebP
+  ✓ XnConvert (free) - batch resize & format conversion
+  ✓ Photoshop / GIMP - manual optimization
+
+Video Processing:
+  ✓ FFmpeg (command-line, free) - format conversion
+  ✓ HandBrake (free, GUI) - H.264 encoding
+  ✓ Adobe Media Encoder (subscription) - professional encoding
+  ✓ DaVinci Resolve (free) - video editing & export
+
+CAD Rendering:
+  ✓ Fusion 360 (free for personal/education) - render from STEP
+  ✓ Blender (free, open-source) - import STEP, render, export PNG
+  ✓ OnShape (cloud, free tier) - render directly in browser
+  ✓ Solidworks (subscription) - render from STEP file
+
+Data Processing:
+  ✓ SheetJS (JavaScript library) - convert Excel to JSON
+  ✓ Python pandas - Excel to JSON conversion script
+  ✓ Airtable - structured data entry & export to JSON
+
+Content Writing:
+  ✓ VS Code (free) - markdown editing
+  ✓ Obsidian (free) - markdown with metadata
+  ✓ iA Writer (paid) - focused markdown writing
+  ✓ Grammarly - prose quality checking
+
+================================================================================
+CHECKLIST: BEFORE GIVING TO CLAUDE.AI
+================================================================================
+
+Assets Prepared:
+  ☐ 8 CAD renders created (PNG/JPEG, 1920x1080+)
+  ☐ 30+ photos optimized to WebP (<500KB each)
+  ☐ Photos organized into: build-progress/, components/, assembly/, gallery/
+  ☐ 6+ videos converted to H.264 MP4 (1080p, <100MB each)
+  ☐ Video thumbnails created (JPG, 1280x720)
+  ☐ BOM Excel converted to JSON (500+ parts)
+  ☐ Timeline events extracted to JSON (20+ events)
+  ☐ Photos metadata in JSON
+  ☐ Videos metadata in JSON
+  ☐ Markdown files written for all 13 sections
+
+Directory Structure:
+  ☐ assets/ folder created with all subfolders
+  ☐ public/data/ folder created with all JSON files
+  ☐ content/ folder created with all markdown files
+  ☐ All files in correct locations (see structure above)
+  ☐ All file naming is lowercase with hyphens (no spaces)
+  ☐ All paths are relative from blog-rsLSM/ root
+
+Documentation:
+  ☐ README-BLOG-PROJECT.md reviewed
+  ☐ WEBSITE-BUILD-PLAN.md reviewed
+  ☐ CLAUDE-AI-BUILD-PROMPT.md reviewed
+  ☐ All requirements understood
+
+Ready for Claude.ai:
+  ☐ All asset files prepared
+  ☐ CLAUDE-AI-BUILD-PROMPT.md ready to provide
+  ☐ Questions answered (domain, timeline, features, etc.)
+  ☐ Claude.ai given clear instructions to follow phases A-K
+
+================================================================================
+
+This template shows the exact structure needed for successful website build.
+Follow this structure when preparing assets.
+
+If any files or folders are missing when Claude.ai starts, the build will fail.
+Verify all files exist before proceeding.
+
+================================================================================

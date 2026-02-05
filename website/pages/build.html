@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Build Guide | rsLSM v1.1</title>
+    <meta name="description" content="Step-by-step build guide for the rsLSM v1.1 remote scanning light sheet microscope.">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: { 900: '#0A1628', 800: '#132844', 700: '#1e3a5f', 600: '#2a4a73' },
+                        cyan: { 400: '#33E1FF', 500: '#00D9FF' },
+                        success: '#00FF88',
+                        warning: '#FFB800',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        body { background-color: #0A1628; font-family: 'Inter', system-ui, sans-serif; }
+        .glow-border { box-shadow: 0 0 0 1px rgba(0, 217, 255, 0.1); transition: box-shadow 0.3s ease; }
+        .glow-border:hover { box-shadow: 0 0 20px rgba(0, 217, 255, 0.3), 0 0 0 1px rgba(0, 217, 255, 0.5); }
+        .gradient-text { background: linear-gradient(135deg, #00D9FF 0%, #00FF88 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .phase-section { scroll-margin-top: 100px; }
+    </style>
+</head>
+<body class="text-gray-100 min-h-screen">
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-navy-900/95 backdrop-blur-md border-b border-navy-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="../index.html" class="flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded bg-cyan-500/20 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                        </svg>
+                    </div>
+                    <span class="font-semibold text-lg">rsLSM v1.1</span>
+                </a>
+
+                <div class="hidden md:flex items-center space-x-1">
+                    <a href="../index.html" class="px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-navy-700 transition">Home</a>
+                    <a href="build.html" class="px-4 py-2 rounded-lg text-cyan-400 bg-cyan-500/10 font-medium">Build Guide</a>
+                    <a href="bom.html" class="px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-navy-700 transition">BOM</a>
+                    <a href="cad.html" class="px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-navy-700 transition">CAD</a>
+                    <a href="timeline.html" class="px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-navy-700 transition">Timeline</a>
+                    <a href="technical.html" class="px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-navy-700 transition">Technical</a>
+                    <a href="resources.html" class="px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-navy-700 transition">Resources</a>
+                    <a href="about.html" class="px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-navy-700 transition">About</a>
+                </div>
+
+                <button id="mobile-menu-btn" class="md:hidden p-2 rounded-lg hover:bg-navy-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div id="mobile-menu" class="hidden md:hidden bg-navy-800 border-t border-navy-700">
+            <div class="px-4 py-3 space-y-2">
+                <a href="../index.html" class="block px-4 py-2 rounded-lg text-gray-300 hover:bg-navy-700">Home</a>
+                <a href="build.html" class="block px-4 py-2 rounded-lg text-cyan-400 bg-cyan-500/10">Build Guide</a>
+                <a href="bom.html" class="block px-4 py-2 rounded-lg text-gray-300 hover:bg-navy-700">BOM</a>
+                <a href="cad.html" class="block px-4 py-2 rounded-lg text-gray-300 hover:bg-navy-700">CAD</a>
+                <a href="timeline.html" class="block px-4 py-2 rounded-lg text-gray-300 hover:bg-navy-700">Timeline</a>
+                <a href="technical.html" class="block px-4 py-2 rounded-lg text-gray-300 hover:bg-navy-700">Technical</a>
+                <a href="resources.html" class="block px-4 py-2 rounded-lg text-gray-300 hover:bg-navy-700">Resources</a>
+                <a href="about.html" class="block px-4 py-2 rounded-lg text-gray-300 hover:bg-navy-700">About</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex pt-16">
+        <!-- Sidebar Navigation -->
+        <aside class="hidden lg:block w-64 fixed left-0 top-16 bottom-0 bg-navy-800/50 border-r border-navy-700 overflow-y-auto">
+            <div class="p-6">
+                <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Build Phases</h3>
+                <nav class="space-y-2">
+                    <a href="#overview" class="block px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-navy-700 transition">Overview</a>
+                    <a href="#illumination" class="block px-4 py-2 rounded-lg text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 transition">
+                        <span class="text-xs text-cyan-500 mr-2">01</span> Illumination Path
+                    </a>
+                    <a href="#imaging" class="block px-4 py-2 rounded-lg text-green-400 hover:text-green-300 hover:bg-green-500/10 transition">
+                        <span class="text-xs text-green-500 mr-2">02</span> Imaging Path
+                    </a>
+                    <a href="#electronics" class="block px-4 py-2 rounded-lg text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/10 transition">
+                        <span class="text-xs text-yellow-500 mr-2">03</span> Electronics
+                    </a>
+                    <a href="#software" class="block px-4 py-2 rounded-lg text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 transition">
+                        <span class="text-xs text-purple-500 mr-2">04</span> Software
+                    </a>
+                </nav>
+
+                <div class="mt-8 pt-8 border-t border-navy-700">
+                    <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Resources</h3>
+                    <nav class="space-y-2">
+                        <a href="bom.html" class="block px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-navy-700 transition text-sm">
+                            Parts List (BOM)
+                        </a>
+                        <a href="cad.html" class="block px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-navy-700 transition text-sm">
+                            CAD Models
+                        </a>
+                        <a href="technical.html" class="block px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-navy-700 transition text-sm">
+                            Technical Details
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 lg:ml-64 min-h-screen">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <!-- Breadcrumb -->
+                <nav class="flex items-center text-sm text-gray-500 mb-8">
+                    <a href="../index.html" class="hover:text-cyan-400">Home</a>
+                    <svg class="w-4 h-4 mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                    <span class="text-gray-300">Build Guide</span>
+                </nav>
+
+                <!-- Overview Section -->
+                <section id="overview" class="phase-section mb-16">
+                    <h1 class="text-4xl font-bold text-white mb-6">Build Guide</h1>
+                    <p class="text-xl text-gray-400 mb-8">
+                        Complete step-by-step guide to rebuilding the rsLSM v1.1 remote scanning light sheet microscope.
+                    </p>
+
+                    <div class="bg-navy-800 rounded-xl p-6 border border-navy-700 mb-8">
+                        <h2 class="text-lg font-semibold text-white mb-4">Build Overview</h2>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h3 class="text-sm font-semibold text-gray-400 uppercase mb-2">Timeline</h3>
+                                <p class="text-gray-300">September 2025 - January 2026 (4 months)</p>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-semibold text-gray-400 uppercase mb-2">Original Design</h3>
+                                <p class="text-gray-300">Based on Zeguan Wang's rsLSM (PhD Thesis, 2024)</p>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-semibold text-gray-400 uppercase mb-2">Total Components</h3>
+                                <p class="text-gray-300">248+ parts from 13 vendors</p>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-semibold text-gray-400 uppercase mb-2">Application</h3>
+                                <p class="text-gray-300">Whole-brain zebrafish voltage imaging</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Phase Progress -->
+                    <div class="space-y-4 mb-8">
+                        <a href="#illumination" class="block bg-navy-800 rounded-xl p-6 border border-navy-700 hover:border-cyan-500/50 transition glow-border">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="w-12 h-12 rounded-lg bg-cyan-500/20 flex items-center justify-center mr-4">
+                                        <span class="text-cyan-400 font-bold">01</span>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-white">Illumination Path</h3>
+                                        <p class="text-gray-400 text-sm">Laser, beam expansion, galvos, light sheet formation</p>
+                                    </div>
+                                </div>
+                                <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </div>
+                        </a>
+
+                        <a href="#imaging" class="block bg-navy-800 rounded-xl p-6 border border-navy-700 hover:border-green-500/50 transition glow-border">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="w-12 h-12 rounded-lg bg-green-500/20 flex items-center justify-center mr-4">
+                                        <span class="text-green-400 font-bold">02</span>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-white">Imaging Path</h3>
+                                        <p class="text-gray-400 text-sm">Detection optics, filters, camera system</p>
+                                    </div>
+                                </div>
+                                <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </div>
+                        </a>
+
+                        <a href="#electronics" class="block bg-navy-800 rounded-xl p-6 border border-navy-700 hover:border-yellow-500/50 transition glow-border">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="w-12 h-12 rounded-lg bg-yellow-500/20 flex items-center justify-center mr-4">
+                                        <span class="text-yellow-400 font-bold">03</span>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-white">Electronics Integration</h3>
+                                        <p class="text-gray-400 text-sm">DAQ, piezo control, signal routing</p>
+                                    </div>
+                                </div>
+                                <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </div>
+                        </a>
+
+                        <a href="#software" class="block bg-navy-800 rounded-xl p-6 border border-navy-700 hover:border-purple-500/50 transition glow-border">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="w-12 h-12 rounded-lg bg-purple-500/20 flex items-center justify-center mr-4">
+                                        <span class="text-purple-400 font-bold">04</span>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-white">Software Setup</h3>
+                                        <p class="text-gray-400 text-sm">Control software, acquisition, processing</p>
+                                    </div>
+                                </div>
+                                <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </div>
+                        </a>
+                    </div>
+                </section>
+
+                <!-- Phase 1: Illumination -->
+                <section id="illumination" class="phase-section mb-16">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 rounded-lg bg-cyan-500/20 flex items-center justify-center mr-4">
+                            <svg class="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <span class="text-cyan-400 text-sm font-semibold">PHASE 1</span>
+                            <h2 class="text-3xl font-bold text-white">Illumination Path</h2>
+                        </div>
+                    </div>
+
+                    <div class="prose prose-invert max-w-none">
+                        <p class="text-gray-300 text-lg mb-6">
+                            The illumination path generates and shapes the light sheet that excites fluorophores in the sample.
+                            This phase covers the laser source, beam expansion optics, galvanometer mirrors for remote scanning,
+                            and the optics that form the final light sheet.
+                        </p>
+
+                        <div class="bg-navy-800 rounded-xl p-6 border border-cyan-500/30 mb-8">
+                            <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
+                                <svg class="w-5 h-5 text-cyan-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                Key Principles
+                            </h3>
+                            <ul class="space-y-3 text-gray-300">
+                                <li class="flex items-start">
+                                    <span class="text-cyan-400 mr-2">•</span>
+                                    <span><strong class="text-white">Remote Scanning:</strong> The galvo mirrors deflect the beam before it enters the objective, allowing the light sheet to scan without moving the sample.</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-cyan-400 mr-2">•</span>
+                                    <span><strong class="text-white">Beam Expansion:</strong> The laser beam is expanded to fill the back aperture of the illumination objective for optimal light sheet thickness.</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-cyan-400 mr-2">•</span>
+                                    <span><strong class="text-white">Cylindrical Optics:</strong> Convert the Gaussian beam into a light sheet profile.</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <h3 class="text-xl font-semibold text-white mb-4">Components</h3>
+                        <div class="bg-navy-800 rounded-xl border border-navy-700 overflow-hidden mb-8">
+                            <table class="w-full">
+                                <thead class="bg-navy-900">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-300">Component</th>
+                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-300">Vendor</th>
+                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-300">Purpose</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-navy-700">
+                                    <tr>
+                                        <td class="px-4 py-3 text-gray-300">488nm Laser</td>
+                                        <td class="px-4 py-3"><span class="text-cyan-400">Coherent/OBIS</span></td>
+                                        <td class="px-4 py-3 text-gray-400">Excitation source for voltage indicators</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-3 text-gray-300">Galvanometer Mirrors</td>
+                                        <td class="px-4 py-3"><span class="text-cyan-400">Cambridge Technology</span></td>
+                                        <td class="px-4 py-3 text-gray-400">High-speed beam steering for remote scanning</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-3 text-gray-300">Beam Expander</td>
+                                        <td class="px-4 py-3"><span class="text-cyan-400">ThorLabs</span></td>
+                                        <td class="px-4 py-3 text-gray-400">Expand beam to fill objective aperture</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-3 text-gray-300">Cylindrical Lens</td>
+                                        <td class="px-4 py-3"><span class="text-cyan-400">ThorLabs</span></td>
+                                        <td class="px-4 py-3 text-gray-400">Light sheet formation</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-3 text-gray-300">Scan Lens</td>
+                                        <td class="px-4 py-3"><span class="text-cyan-400">ThorLabs</span></td>
+                                        <td class="px-4 py-3 text-gray-400">Telecentric scanning relay</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <a href="bom.html?phase=1" class="inline-flex items-center text-cyan-400 hover:text-cyan-300 mb-8">
+                            View all Phase 1 components in BOM
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </a>
+
+                        <h3 class="text-xl font-semibold text-white mb-4">Assembly Steps</h3>
+                        <div class="space-y-4 mb-8">
+                            <div class="bg-navy-800 rounded-xl p-6 border border-navy-700">
+                                <div class="flex items-start">
+                                    <div class="w-8 h-8 rounded-full bg-cyan-500/20 flex items-center justify-center flex-shrink-0 mr-4">
+                                        <span class="text-cyan-400 font-bold text-sm">1</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-white mb-2">Mount the Laser Source</h4>
+                                        <p class="text-gray-400">
+                                            Secure the 488nm laser to the optical table using appropriate posts and clamps.
+                                            Ensure the beam height matches your optical axis (typically 4" or 100mm).
+                                        </p>
+                                        <div class="mt-3 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                                            <div class="flex items-start">
+                                                <svg class="w-5 h-5 text-yellow-400 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                                </svg>
+                                                <span class="text-yellow-400 text-sm">
+                                                    <strong>Safety:</strong> Always use appropriate laser safety eyewear when aligning.
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-navy-800 rounded-xl p-6 border border-navy-700">
+                                <div class="flex items-start">
+                                    <div class="w-8 h-8 rounded-full bg-cyan-500/20 flex items-center justify-center flex-shrink-0 mr-4">
+                                        <span class="text-cyan-400 font-bold text-sm">2</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-white mb-2">Install Beam Expansion Optics</h4>
+                                        <p class="text-gray-400">
+                                            Set up the beam expander to achieve the target beam diameter.
+                                            Use a beam profiler to verify Gaussian profile and collimation.
+                                        </p>
+                                        <div class="mt-3 p-3 bg-cyan-500/10 border border-cyan-500/30 rounded-lg">
+                                            <div class="flex items-start">
+                                                <svg class="w-5 h-5 text-cyan-400 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                </svg>
+                                                <span class="text-cyan-400 text-sm">
+                                                    <strong>Tip:</strong> Target beam diameter should fill ~80% of the objective back aperture.
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-navy-800 rounded-xl p-6 border border-navy-700">
+                                <div class="flex items-start">
+                                    <div class="w-8 h-8 rounded-full bg-cyan-500/20 flex items-center justify-center flex-shrink-0 mr-4">
+                                        <span class="text-cyan-400 font-bold text-sm">3</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-white mb-2">Mount Galvanometer Assembly</h4>
+                                        <p class="text-gray-400">
+                                            Position the galvo mirrors at the conjugate plane. The mirror pivot should be at
+                                            the pupil plane of the scan lens system.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-navy-800 rounded-xl p-6 border border-navy-700">
+                                <div class="flex items-start">
+                                    <div class="w-8 h-8 rounded-full bg-cyan-500/20 flex items-center justify-center flex-shrink-0 mr-4">
+                                        <span class="text-cyan-400 font-bold text-sm">4</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-white mb-2">Install Scan and Tube Lenses</h4>
+                                        <p class="text-gray-400">
+                                            Set up the 4f relay system with scan lens and tube lens to create telecentric scanning.
+                                            Verify the focal lengths are matched for the desired magnification.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-navy-800 rounded-xl p-6 border border-navy-700">
+                                <div class="flex items-start">
+                                    <div class="w-8 h-8 rounded-full bg-cyan-500/20 flex items-center justify-center flex-shrink-0 mr-4">
+                                        <span class="text-cyan-400 font-bold text-sm">5</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-white mb-2">Add Cylindrical Lens for Light Sheet</h4>
+                                        <p class="text-gray-400">
+                                            Position the cylindrical lens to create the light sheet profile.
+                                            The light sheet thickness is determined by the NA at the sample plane.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Phase 2: Imaging -->
+                <section id="imaging" class="phase-section mb-16">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 rounded-lg bg-green-500/20 flex items-center justify-center mr-4">
+                            <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <span class="text-green-400 text-sm font-semibold">PHASE 2</span>
+                            <h2 class="text-3xl font-bold text-white">Imaging Path</h2>
+                        </div>
+                    </div>
+
+                    <div class="prose prose-invert max-w-none">
+                        <p class="text-gray-300 text-lg mb-6">
+                            The imaging path collects fluorescence from the sample and forms an image on the camera sensor.
+                            This includes the detection objective, tube lens, emission filters, and camera mounting.
+                        </p>
+
+                        <div class="bg-navy-800 rounded-xl p-6 border border-green-500/30 mb-8">
+                            <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
+                                <svg class="w-5 h-5 text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                Key Considerations
+                            </h3>
+                            <ul class="space-y-3 text-gray-300">
+                                <li class="flex items-start">
+                                    <span class="text-green-400 mr-2">•</span>
+                                    <span><strong class="text-white">Remote Focusing:</strong> A remote mirror allows axial scanning without moving the sample or objective.</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-green-400 mr-2">•</span>
+                                    <span><strong class="text-white">High NA Collection:</strong> Use a high-NA detection objective to maximize fluorescence collection efficiency.</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-green-400 mr-2">•</span>
+                                    <span><strong class="text-white">Filter Selection:</strong> Emission filters must match the voltage indicator emission spectrum while blocking excitation light.</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <h3 class="text-xl font-semibold text-white mb-4">Components</h3>
+                        <div class="bg-navy-800 rounded-xl border border-navy-700 overflow-hidden mb-8">
+                            <table class="w-full">
+                                <thead class="bg-navy-900">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-300">Component</th>
+                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-300">Vendor</th>
+                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-300">Purpose</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-navy-700">
+                                    <tr>
+                                        <td class="px-4 py-3 text-gray-300">Detection Objective</td>
+                                        <td class="px-4 py-3"><span class="text-green-400">Nikon/Olympus</span></td>
+                                        <td class="px-4 py-3 text-gray-400">High-NA fluorescence collection</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-3 text-gray-300">Remote Mirror</td>
+                                        <td class="px-4 py-3"><span class="text-green-400">Chroma</span></td>
+                                        <td class="px-4 py-3 text-gray-400">Remote focusing for axial scanning</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-3 text-gray-300">Tube Lens</td>
+                                        <td class="px-4 py-3"><span class="text-green-400">ThorLabs</span></td>
+                                        <td class="px-4 py-3 text-gray-400">Image formation at camera</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-3 text-gray-300">Emission Filter</td>
+                                        <td class="px-4 py-3"><span class="text-green-400">Semrock</span></td>
+                                        <td class="px-4 py-3 text-gray-400">Block excitation, pass emission</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-3 text-gray-300">sCMOS Camera</td>
+                                        <td class="px-4 py-3"><span class="text-green-400">Hamamatsu</span></td>
+                                        <td class="px-4 py-3 text-gray-400">High-speed image acquisition</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <a href="bom.html?phase=2" class="inline-flex items-center text-green-400 hover:text-green-300">
+                            View all Phase 2 components in BOM
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </a>
+                    </div>
+                </section>
+
+                <!-- Phase 3: Electronics -->
+                <section id="electronics" class="phase-section mb-16">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 rounded-lg bg-yellow-500/20 flex items-center justify-center mr-4">
+                            <svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <span class="text-yellow-400 text-sm font-semibold">PHASE 3</span>
+                            <h2 class="text-3xl font-bold text-white">Electronics Integration</h2>
+                        </div>
+                    </div>
+
+                    <div class="prose prose-invert max-w-none">
+                        <p class="text-gray-300 text-lg mb-6">
+                            The electronics phase connects all components for synchronized control. This includes the DAQ system,
+                            piezo controllers, galvo drivers, and signal routing.
+                        </p>
+
+                        <div class="bg-navy-800 rounded-xl p-6 border border-yellow-500/30 mb-8">
+                            <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
+                                <svg class="w-5 h-5 text-yellow-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                                </svg>
+                                System Architecture
+                            </h3>
+                            <p class="text-gray-300 mb-4">
+                                The electronics system uses a National Instruments DAQ for generating analog control signals
+                                and digital triggers. Precise timing synchronization is critical for remote scanning.
+                            </p>
+                            <a href="../rsLSM v1.1 Electronics Connection Diagram.pdf" target="_blank"
+                                class="inline-flex items-center px-4 py-2 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 rounded-lg transition">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                View Wiring Diagram (PDF)
+                            </a>
+                        </div>
+
+                        <h3 class="text-xl font-semibold text-white mb-4">Key Components</h3>
+                        <div class="grid md:grid-cols-2 gap-4 mb-8">
+                            <div class="bg-navy-800 rounded-xl p-4 border border-navy-700">
+                                <h4 class="font-semibold text-white mb-2">Data Acquisition</h4>
+                                <p class="text-gray-400 text-sm">NI DAQ for analog output (galvo, piezo) and digital triggering (camera, laser)</p>
+                            </div>
+                            <div class="bg-navy-800 rounded-xl p-4 border border-navy-700">
+                                <h4 class="font-semibold text-white mb-2">Galvo Drivers</h4>
+                                <p class="text-gray-400 text-sm">High-bandwidth servo drivers for mirror position control</p>
+                            </div>
+                            <div class="bg-navy-800 rounded-xl p-4 border border-navy-700">
+                                <h4 class="font-semibold text-white mb-2">Piezo Controller</h4>
+                                <p class="text-gray-400 text-sm">Closed-loop controller for remote mirror positioning</p>
+                            </div>
+                            <div class="bg-navy-800 rounded-xl p-4 border border-navy-700">
+                                <h4 class="font-semibold text-white mb-2">Timing/Sync</h4>
+                                <p class="text-gray-400 text-sm">TTL triggers for camera exposure and laser modulation</p>
+                            </div>
+                        </div>
+
+                        <a href="bom.html?phase=3" class="inline-flex items-center text-yellow-400 hover:text-yellow-300">
+                            View all Phase 3 components in BOM
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </a>
+                    </div>
+                </section>
+
+                <!-- Phase 4: Software -->
+                <section id="software" class="phase-section mb-16">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 rounded-lg bg-purple-500/20 flex items-center justify-center mr-4">
+                            <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <span class="text-purple-400 text-sm font-semibold">PHASE 4</span>
+                            <h2 class="text-3xl font-bold text-white">Software Setup</h2>
+                        </div>
+                    </div>
+
+                    <div class="prose prose-invert max-w-none">
+                        <p class="text-gray-300 text-lg mb-6">
+                            The software phase covers control software configuration, data acquisition pipelines,
+                            and real-time processing setup for voltage imaging experiments.
+                        </p>
+
+                        <div class="bg-navy-800 rounded-xl p-6 border border-purple-500/30 mb-8">
+                            <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
+                                <svg class="w-5 h-5 text-purple-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                Software Stack
+                            </h3>
+                            <ul class="space-y-3 text-gray-300">
+                                <li class="flex items-start">
+                                    <span class="text-purple-400 mr-2">•</span>
+                                    <span><strong class="text-white">LabVIEW/MATLAB:</strong> DAQ control and waveform generation</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-purple-400 mr-2">•</span>
+                                    <span><strong class="text-white">HCImage:</strong> Camera acquisition software</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-purple-400 mr-2">•</span>
+                                    <span><strong class="text-white">Python:</strong> Data processing and analysis pipelines</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <h3 class="text-xl font-semibold text-white mb-4">Configuration Steps</h3>
+                        <div class="space-y-4">
+                            <div class="bg-navy-800 rounded-xl p-6 border border-navy-700">
+                                <div class="flex items-start">
+                                    <div class="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0 mr-4">
+                                        <span class="text-purple-400 font-bold text-sm">1</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-white mb-2">Install DAQ Drivers</h4>
+                                        <p class="text-gray-400">Install NI-DAQmx drivers and verify device recognition.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-navy-800 rounded-xl p-6 border border-navy-700">
+                                <div class="flex items-start">
+                                    <div class="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0 mr-4">
+                                        <span class="text-purple-400 font-bold text-sm">2</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-white mb-2">Configure Camera SDK</h4>
+                                        <p class="text-gray-400">Set up Hamamatsu DCAM-API for high-speed acquisition.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-navy-800 rounded-xl p-6 border border-navy-700">
+                                <div class="flex items-start">
+                                    <div class="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0 mr-4">
+                                        <span class="text-purple-400 font-bold text-sm">3</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-white mb-2">Set Up Control Software</h4>
+                                        <p class="text-gray-400">Configure waveform generation for synchronized scanning.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-navy-800 rounded-xl p-6 border border-navy-700">
+                                <div class="flex items-start">
+                                    <div class="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0 mr-4">
+                                        <span class="text-purple-400 font-bold text-sm">4</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-white mb-2">Test Full System</h4>
+                                        <p class="text-gray-400">Verify synchronized operation with test samples.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Next Steps -->
+                <section class="bg-navy-800 rounded-xl p-8 border border-navy-700">
+                    <h2 class="text-2xl font-bold text-white mb-4">Continue Exploring</h2>
+                    <p class="text-gray-400 mb-6">
+                        Ready to dive deeper? Check out these resources for more detailed information.
+                    </p>
+                    <div class="grid md:grid-cols-3 gap-4">
+                        <a href="bom.html" class="p-4 bg-navy-700 rounded-lg hover:bg-navy-600 transition">
+                            <div class="text-cyan-400 font-semibold mb-1">Bill of Materials</div>
+                            <p class="text-gray-400 text-sm">Complete parts list</p>
+                        </a>
+                        <a href="cad.html" class="p-4 bg-navy-700 rounded-lg hover:bg-navy-600 transition">
+                            <div class="text-cyan-400 font-semibold mb-1">CAD Models</div>
+                            <p class="text-gray-400 text-sm">3D design files</p>
+                        </a>
+                        <a href="technical.html" class="p-4 bg-navy-700 rounded-lg hover:bg-navy-600 transition">
+                            <div class="text-cyan-400 font-semibold mb-1">Technical Details</div>
+                            <p class="text-gray-400 text-sm">Deep dive articles</p>
+                        </a>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="lg:ml-64 py-8 border-t border-navy-700">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-500 text-sm">
+            <p>&copy; 2025-2026 Quilee Simeon | <a href="https://synthneuro.org" class="text-cyan-400 hover:underline">Boyden Lab</a>, MIT</p>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        });
+    </script>
+</body>
+</html>
