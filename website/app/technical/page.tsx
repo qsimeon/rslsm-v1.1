@@ -50,7 +50,7 @@ const articles = [
     id: 'camera-acquisition',
     title: 'High-Speed Camera Acquisition',
     subtitle: 'Data Streaming & Processing',
-    description: 'Technical guide to configuring sCMOS cameras for whole-brain imaging at 500 Hz volumetric rates. Covers data streaming, triggering, and real-time processing.',
+    description: 'Technical guide to configuring sCMOS cameras for whole-brain imaging at 200 Hz volumetric rates. Covers data streaming, triggering, and real-time processing.',
     icon: Zap,
     readTime: '10 min',
     tags: ['Camera', 'Data', 'Speed'],

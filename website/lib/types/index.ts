@@ -47,6 +47,64 @@ export interface BuildStep {
   notes?: string
 }
 
+// Build Guide Phase (comprehensive)
+export interface BuildGuidePhase {
+  number: 1 | 2 | 3 | 4
+  title: string
+  description: string
+  startDate: string
+  endDate: string
+  duration: string
+  technicalOverview: string
+  principles: string[]
+  steps: AssemblyStep[]
+  photos: Photo[]
+  videoUrl?: string
+  troubleshooting: TroubleshootingItem[]
+  references?: Reference[]
+  keyComponents?: KeyComponent[]
+}
+
+export interface AssemblyStep {
+  number: number
+  title: string
+  description: string
+  tips?: string[]
+  warnings?: string[]
+  images?: Photo[]
+  duration?: string
+  status?: 'complete' | 'in-progress' | 'pending'
+}
+
+export interface Photo {
+  id: string
+  url: string
+  thumbnail?: string
+  caption: string
+  date?: string
+  step?: number
+}
+
+export interface TroubleshootingItem {
+  issue: string
+  cause: string
+  solution: string
+}
+
+export interface Reference {
+  title: string
+  url: string
+  type: 'paper' | 'datasheet' | 'manual' | 'thesis' | 'other'
+  description?: string
+}
+
+export interface KeyComponent {
+  name: string
+  partNumber: string
+  vendor: string
+  description?: string
+}
+
 // CAD Model Types
 export interface CADModel {
   id: string

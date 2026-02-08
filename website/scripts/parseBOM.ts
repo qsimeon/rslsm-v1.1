@@ -16,6 +16,7 @@ interface BOMItem {
   buildPhase: 1 | 2 | 3 | 4;
   orderDate?: string;
   notes?: string;
+  subassembly?: string;
 }
 
 interface Summary {
@@ -24,10 +25,72 @@ interface Summary {
   costByPhase: Record<string, number>;
   costByVendor: Record<string, number>;
   itemsByCategory: Record<string, number>;
+  itemsBySubassembly: Record<string, number>;
+}
+
+// Map subassembly names to build phases
+function getPhaseFromSubassembly(subassm: string): 1 | 2 | 3 | 4 {
+  const lower = subassm.toLowerCase();
+
+  // Phase 1: Sample handling, mechanical basics
+  if (lower.includes('sample') || lower.includes('mount')) return 1;
+
+  // Phase 2: Illumination
+  if (lower.includes('illumination') || lower.includes('light') || lower.includes('led')) return 2;
+
+  // Phase 3: Imaging optics
+  if (lower.includes('imaging') || lower.includes('detection') || lower.includes('camera')) return 3;
+
+  // Phase 4: Electronics, integration
+  if (lower.includes('electronics') || lower.includes('computer') || lower.includes('cable')) return 4;
+
+  // Default
+  return 1;
+}
+
+// Categorize parts based on subassembly and vendor
+function categorizePart(subassm: string, vendor: string, partNum: string): string {
+  const lower = subassm.toLowerCase();
+  const vLower = vendor.toLowerCase();
+  const pLower = partNum.toLowerCase();
+
+  // Electronics
+  if (vLower.includes('digi') || vLower.includes('arduino') || vLower.includes('adafruit') ||
+      pLower.includes('cable') || pLower.includes('wire') || pLower.includes('pcb')) {
+    return 'Electronics';
+  }
+
+  // Optics
+  if (vLower.includes('thor') || vLower.includes('edmund') || vLower.includes('newport') ||
+      vLower.includes('semrock') || vLower.includes('chroma') || vLower.includes('spach') ||
+      lower.includes('illumination') || lower.includes('imaging') || lower.includes('detection') ||
+      pLower.includes('lens') || pLower.includes('mirror') || pLower.includes('filter')) {
+    return 'Optics';
+  }
+
+  // Mechanics
+  if (vLower.includes('mcmaster') || vLower.includes('misumi') ||
+      pLower.includes('screw') || pLower.includes('bracket') || pLower.includes('mount') ||
+      pLower.includes('post') || pLower.includes('plate')) {
+    return 'Mechanics';
+  }
+
+  // Custom/3D Printed
+  if (vLower.includes('custom') || vLower.includes('xometry') ||
+      vLower.includes('3dp') || pLower.includes('3dp')) {
+    return 'Custom Parts';
+  }
+
+  // Sample handling
+  if (lower.includes('sample')) {
+    return 'Sample Handling';
+  }
+
+  return 'Misc';
 }
 
 function parseExcelToBOM(): void {
-  const excelPath = path.join(__dirname, '..', 'BOM-and-SIM-zf-voltage-lightsheet-rsLSM1.1-2025-rebuild.xlsx');
+  const excelPath = path.join(__dirname, '..', '..', 'BOM-and-SIM-zf-voltage-lightsheet-rsLSM1.1-2025-rebuild.xlsx');
   const outputPath = path.join(__dirname, '..', 'data', 'bom.json');
 
   console.log('📊 Parsing BOM Excel file...');
@@ -56,41 +119,53 @@ function parseExcelToBOM(): void {
 
   rawData.forEach((row, index) => {
     try {
-      // Try to detect column names (flexible mapping)
-      const name = row['Part Name'] || row['Name'] || row['Item'] || row['Component'] || '';
-      const description = row['Description'] || row['Details'] || row['Desc'] || '';
-      const vendor = row['Vendor'] || row['Supplier'] || row['Source'] || '';
-      const partNumber = row['Part Number'] || row['Part #'] || row['PartNumber'] || row['SKU'] || '';
-      const quantity = parseInt(row['Quantity'] || row['Qty'] || row['Count'] || '1');
-      const unitPrice = parseFloat((row['Unit Price'] || row['Price'] || row['Unit Cost'] || '0').toString().replace(/[$,]/g, ''));
-      const category = row['Category'] || row['Type'] || row['Class'] || 'Misc';
-      const buildPhase = parseInt(row['Build Phase'] || row['Phase'] || row['Stage'] || '1') as 1 | 2 | 3 | 4;
-      const orderDate = row['Order Date'] || row['Date'] || undefined;
-      const notes = row['Notes'] || row['Comments'] || undefined;
-      const vendorUrl = row['Vendor URL'] || row['URL'] || row['Link'] || undefined;
+      // Extract fields using actual column names from Excel
+      const partNum = row['Part Num'] || '';
+      const description = row['Description'] || '';
+      const vendor = row['Vendor'] || '';
+      const subassembly = row['Subassm.'] || '';
+      const notes = row['Note'] || '';
 
-      // Skip rows with no name or vendor
-      if (!name || !vendor) {
+      // Quantity fields
+      const qDesign = parseInt(row['Q. Design'] || '0');
+      const qBuy = parseInt(row['Q. Buy'] || '0');
+      const qStock = parseInt(row['Q. Stock'] || '0');
+
+      // Price fields
+      const unitPrice = parseFloat((row['U. Price'] || '0').toString().replace(/[$,]/g, ''));
+      const subtotal = parseFloat((row['Subtot.'] || '0').toString().replace(/[$,]/g, ''));
+
+      // Skip rows with no part number or vendor (empty rows, headers, etc.)
+      if (!partNum || !vendor || vendor === '(unknown)') {
         skippedRows++;
         return;
       }
 
-      const totalPrice = quantity * unitPrice;
+      // Use Q. Buy if available, otherwise Q. Design, otherwise Q. Stock
+      const quantity = qBuy > 0 ? qBuy : (qDesign > 0 ? qDesign : qStock);
+
+      // Determine build phase from subassembly
+      const buildPhase = getPhaseFromSubassembly(subassembly);
+
+      // Categorize the part
+      const category = categorizePart(subassembly, vendor, partNum);
+
+      // Calculate total if not provided
+      const totalPrice = subtotal > 0 ? subtotal : (quantity * unitPrice);
 
       bomItems.push({
         id: `bom-${String(bomItems.length + 1).padStart(3, '0')}`,
-        name: name.trim(),
-        description: description.trim(),
+        name: partNum.trim(),
+        description: description.trim() || partNum.trim(),
         vendor: vendor.trim(),
-        partNumber: partNumber.toString().trim(),
-        vendorUrl: vendorUrl?.trim(),
-        quantity: isNaN(quantity) ? 1 : quantity,
-        unitPrice: isNaN(unitPrice) ? 0 : unitPrice,
-        totalPrice: isNaN(totalPrice) ? 0 : totalPrice,
-        category: category.trim(),
-        buildPhase: [1, 2, 3, 4].includes(buildPhase) ? buildPhase : 1,
-        orderDate: orderDate ? formatDate(orderDate) : undefined,
-        notes: notes?.trim(),
+        partNumber: partNum.toString().trim(),
+        quantity: quantity > 0 ? quantity : 1,
+        unitPrice: unitPrice >= 0 ? unitPrice : 0,
+        totalPrice: totalPrice >= 0 ? totalPrice : 0,
+        category: category,
+        buildPhase: buildPhase,
+        notes: notes?.trim() || undefined,
+        subassembly: subassembly.trim() || undefined,
       });
     } catch (error) {
       console.warn(`⚠️  Error parsing row ${index + 1}:`, error);
@@ -113,6 +188,7 @@ function parseExcelToBOM(): void {
     costByPhase: {},
     costByVendor: {},
     itemsByCategory: {},
+    itemsBySubassembly: {},
   };
 
   bomItems.forEach(item => {
@@ -127,6 +203,11 @@ function parseExcelToBOM(): void {
 
     // Items by category
     summary.itemsByCategory[item.category] = (summary.itemsByCategory[item.category] || 0) + 1;
+
+    // Items by subassembly
+    if (item.subassembly) {
+      summary.itemsBySubassembly[item.subassembly] = (summary.itemsBySubassembly[item.subassembly] || 0) + 1;
+    }
   });
 
   // Write to JSON file
@@ -172,29 +253,15 @@ function parseExcelToBOM(): void {
       console.log(`   ${category}: ${count}`);
     });
 
+  console.log('\n🔧 ITEMS BY SUBASSEMBLY (Top 10):');
+  Object.entries(summary.itemsBySubassembly)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .forEach(([subassm, count]) => {
+      console.log(`   ${subassm}: ${count}`);
+    });
+
   console.log(`\n📁 Output saved to: ${outputPath}\n`);
-}
-
-function formatDate(dateValue: any): string | undefined {
-  if (!dateValue) return undefined;
-
-  try {
-    // Handle Excel date serial numbers
-    if (typeof dateValue === 'number') {
-      const date = XLSX.SSF.parse_date_code(dateValue);
-      return `${date.y}-${String(date.m).padStart(2, '0')}-${String(date.d).padStart(2, '0')}`;
-    }
-
-    // Handle string dates
-    const date = new Date(dateValue);
-    if (!isNaN(date.getTime())) {
-      return date.toISOString().split('T')[0];
-    }
-  } catch (error) {
-    console.warn('Error parsing date:', dateValue);
-  }
-
-  return undefined;
 }
 
 // Run the parser

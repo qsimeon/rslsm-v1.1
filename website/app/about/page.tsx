@@ -146,7 +146,7 @@ export default function AboutPage() {
               <div className="text-sm text-text-secondary">Neurons Imaged</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-cyan mb-1">500 Hz</div>
+              <div className="text-3xl font-bold text-cyan mb-1">200 Hz</div>
               <div className="text-sm text-text-secondary">Volumetric Rate</div>
             </div>
             <div className="text-center">

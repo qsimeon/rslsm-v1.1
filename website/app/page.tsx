@@ -181,7 +181,7 @@ const Home: React.FC = () => {
                   originally designed and built by <strong className="text-text-light">Zeguan Wang</strong> as
                   part of his PhD thesis at MIT. Wang&apos;s groundbreaking work demonstrated that
                   remote scanning—using conjugate optics and piezo actuators—enables high-speed
-                  volumetric imaging without sample motion, achieving rates of 100-500 Hz.
+                  volumetric imaging without sample motion, achieving rates of 100-300 Hz.
                 </p>
                 <p className="text-text-secondary mb-6 leading-relaxed">
                   Our v1.1 rebuild follows the same optical principles while incorporating
@@ -219,7 +219,7 @@ const Home: React.FC = () => {
                     </li>
                     <li className="flex items-start gap-2">
                       <div className="w-1.5 h-1.5 rounded-full bg-cyan mt-2 shrink-0" />
-                      Achieves 100-500 Hz volumetric imaging rates
+                      Achieves 100-300 Hz volumetric imaging rates
                     </li>
                     <li className="flex items-start gap-2">
                       <div className="w-1.5 h-1.5 rounded-full bg-cyan mt-2 shrink-0" />
@@ -269,7 +269,7 @@ const Home: React.FC = () => {
             <StatCard value="4 Months" label="Build Time" delay={0} animate={false} />
             <StatCard value="547" label="Components" delay={0.1} />
             <StatCard value="8" label="Vendors" delay={0.2} />
-            <StatCard value="500 Hz" label="Volume Rate" delay={0.3} />
+            <StatCard value="200+ Hz" label="Volumetric Rate" delay={0.3} />
           </div>
         </Container>
       </section>

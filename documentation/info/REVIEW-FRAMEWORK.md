@@ -35,7 +35,7 @@ website/app/
 |------|--------|-------|
 | Hero text | ✅ Fixed | "(re)designed and (re)built" |
 | Wang citation | ✅ Fixed | Correct format |
-| Statistics (100k neurons, 500 Hz, etc.) | ⚠️ Verify | Cross-check with Wang preprint |
+| Statistics (100k neurons, 200 Hz, etc.) | ⚠️ Verify | Cross-check with Wang preprint |
 | 3D CAD viewer | ⚠️ Functional | 93MB model loads, consider further optimization |
 | Video player | ⚠️ Verify | Is this the correct zebrafish video? |
 | Photo grid | ❌ Check | Are photos displaying correctly? |
