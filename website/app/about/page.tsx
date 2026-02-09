@@ -306,8 +306,7 @@ export default function AboutPage() {
             <div>
               <p className="text-sm text-cyan font-medium mb-2">Original rsLSM Design:</p>
               <code className="block text-sm text-text-secondary font-mono bg-primary-surface p-4 rounded-lg overflow-x-auto">
-                Wang, Z., et al. (2023). High-speed volumetric imaging of the whole brain
-                using remote scanning light sheet microscopy. bioRxiv.
+                Wang, Z., et al. (2023). Imaging the voltage of neurons distributed across entire brains of larval zebrafish. *bioRxiv*.
                 <a
                   href="https://www.biorxiv.org/content/10.1101/2023.12.15.571964v1"
                   target="_blank"

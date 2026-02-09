@@ -66,7 +66,7 @@ To add build progress photos:
 ## Citation
 
 **Original rsLSM Design:**
-> Wang, Z., et al. (2023). "High-speed volumetric imaging of the whole brain using remote scanning light sheet microscopy." *bioRxiv*.
+> Wang, Z., et al. (2023). "Imaging the voltage of neurons distributed across entire brains of larval zebrafish." *bioRxiv*.
 > https://doi.org/10.1101/2023.12.15.571964
 
 **This Documentation:**

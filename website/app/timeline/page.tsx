@@ -1,318 +1,310 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import {
-  Calendar,
-  Package,
-  Milestone,
-  Wrench,
-  CheckCircle2,
-  Clock,
-  DollarSign,
-  Filter
-} from 'lucide-react';
-import Container from '@/components/ui/Container';
+import { EventFilters, type FilterState } from '@/components/features/EventFilters';
+import { TimelineComponent } from '@/components/features/TimelineComponent';
+import { TimelineEventCard } from '@/components/features/TimelineEventCard';
+import { BudgetChart } from '@/components/features/BudgetChart';
+import { Badge } from '@/components/ui/badge';
+import { Package, CheckCircle2, AlertTriangle, Sparkles } from 'lucide-react';
+import timelineEventsData from '@/data/timeline-events.json';
 
 interface TimelineEvent {
   id: string;
   date: string;
   title: string;
+  type: 'order' | 'milestone' | 'challenge' | 'discovery';
+  phase: 1 | 2 | 3 | 4;
+  vendor?: string;
+  cost?: number;
   description: string;
-  type: string;
-  phase: number;
-  icon?: string;
-  vendors?: string[];
-  value?: number;
+  details?: string;
+  status?: 'pending' | 'in_progress' | 'completed';
+  impact?: 'positive' | 'neutral' | 'negative';
+  tags?: string[];
 }
-
-interface TimelinePhase {
-  id: number;
-  name: string;
-  startDate: string;
-  endDate: string;
-  color: string;
-}
-
-interface TimelineData {
-  events: TimelineEvent[];
-  phases: TimelinePhase[];
-}
-
-const typeIcons: Record<string, React.FC<{ className?: string }>> = {
-  milestone: CheckCircle2,
-  procurement: Package,
-  assembly: Wrench,
-};
-
-const typeColors: Record<string, string> = {
-  milestone: 'bg-success/20 text-success border-success/30',
-  procurement: 'bg-warning/20 text-warning border-warning/30',
-  assembly: 'bg-cyan/20 text-cyan border-cyan/30',
-};
 
 export default function TimelinePage() {
-  const [timelineData, setTimelineData] = useState<TimelineData | null>(null);
-  const [selectedType, setSelectedType] = useState<string>('all');
-  const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState<FilterState>({
+    eventTypes: [],
+    phase: 'all',
+    vendor: 'all',
+  });
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetch('/data/timeline.json')
-      .then(res => res.json())
-      .then(data => {
-        setTimelineData(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Failed to load timeline data:', err);
-        setLoading(false);
-      });
-  }, []);
+  const events = timelineEventsData as TimelineEvent[];
 
-  const filteredEvents = timelineData?.events.filter(
-    event => selectedType === 'all' || event.type === selectedType
-  ) || [];
+  const filteredEvents = useMemo(() => {
+    return events.filter((event) => {
+      // Event type filter
+      if (filters.eventTypes.length > 0 && !filters.eventTypes.includes(event.type)) {
+        return false;
+      }
 
-  const types = ['all', 'milestone', 'procurement', 'assembly'];
+      // Phase filter
+      if (filters.phase !== 'all' && event.phase.toString() !== filters.phase) {
+        return false;
+      }
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
+      // Vendor filter
+      if (filters.vendor !== 'all' && event.vendor !== filters.vendor) {
+        return false;
+      }
+
+      return true;
     });
-  };
+  }, [events, filters]);
 
-  const formatCurrency = (value: number) => {
+  const statistics = useMemo(() => {
+    const totalEvents = events.length;
+    const orders = events.filter((e) => e.type === 'order').length;
+    const milestones = events.filter((e) => e.type === 'milestone').length;
+    const challenges = events.filter((e) => e.type === 'challenge').length;
+    const discoveries = events.filter((e) => e.type === 'discovery').length;
+    const totalCost = events
+      .filter((e) => e.type === 'order' && e.cost)
+      .reduce((sum, e) => sum + (e.cost || 0), 0);
+    const components = 310; // From BOM
+    const vendors = new Set(events.filter((e) => e.vendor).map((e) => e.vendor)).size;
+
+    return {
+      totalEvents,
+      orders,
+      milestones,
+      challenges,
+      discoveries,
+      totalCost,
+      components,
+      vendors,
+    };
+  }, [events]);
+
+  const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(value);
+      maximumFractionDigits: 0,
+    }).format(amount);
   };
 
-  if (loading) {
-    return (
-      <div className="py-20">
-        <Container>
-          <div className="flex items-center justify-center min-h-[400px]">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan"></div>
-          </div>
-        </Container>
-      </div>
-    );
-  }
+  const handleEventClick = (eventId: string) => {
+    setSelectedEventId(eventId);
+    // Scroll to the event card
+    const element = document.getElementById(`event-${eventId}`);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  };
 
   return (
-    <div className="py-12 md:py-20">
-      <Container>
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="mb-12"
-        >
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-text-light mb-4">
-            Build Timeline
-          </h1>
-          <p className="text-xl text-text-secondary max-w-3xl">
-            Track the complete rebuild journey from September 2025 to January 2026,
-            including key milestones, procurement events, and assembly progress.
-          </p>
-        </motion.div>
+    <div className="min-h-screen bg-[#0A1628]">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-b from-[#132844] to-[#0A1628] border-b border-[#1e3a5f]">
+        <div className="container mx-auto px-4 py-16">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="max-w-4xl mx-auto text-center"
+          >
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+              Build Timeline
+            </h1>
+            <p className="text-xl text-cyan-400 mb-4">September 2025 - January 2026</p>
+            <p className="text-gray-300 text-lg leading-relaxed">
+              A chronological view of the 4-month journey to rebuild the rsLSM v1.1 from scratch,
+              including orders, milestones, challenges, and discoveries.
+            </p>
+          </motion.div>
+        </div>
+      </section>
 
-        {/* Stats */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
-        >
-          <div className="bg-primary-surface border border-gray-800 rounded-lg p-5">
-            <Clock className="w-6 h-6 text-cyan mb-2" />
-            <div className="text-2xl font-bold text-text-light">4 Months</div>
-            <div className="text-sm text-text-secondary">Total Duration</div>
-          </div>
-          <div className="bg-primary-surface border border-gray-800 rounded-lg p-5">
-            <Milestone className="w-6 h-6 text-success mb-2" />
-            <div className="text-2xl font-bold text-text-light">
-              {timelineData?.events.filter(e => e.type === 'milestone').length || 0}
-            </div>
-            <div className="text-sm text-text-secondary">Milestones</div>
-          </div>
-          <div className="bg-primary-surface border border-gray-800 rounded-lg p-5">
-            <Package className="w-6 h-6 text-warning mb-2" />
-            <div className="text-2xl font-bold text-text-light">
-              {timelineData?.events.filter(e => e.type === 'procurement').length || 0}
-            </div>
-            <div className="text-sm text-text-secondary">Orders</div>
-          </div>
-          <div className="bg-primary-surface border border-gray-800 rounded-lg p-5">
-            <Wrench className="w-6 h-6 text-cyan mb-2" />
-            <div className="text-2xl font-bold text-text-light">
-              {timelineData?.events.filter(e => e.type === 'assembly').length || 0}
-            </div>
-            <div className="text-sm text-text-secondary">Assembly Events</div>
-          </div>
-        </motion.div>
+      {/* Statistics Section */}
+      <section className="bg-[#0A1628] py-12 border-b border-[#1e3a5f]">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-[#132844] border border-[#1e3a5f] rounded-lg p-4 text-center"
+            >
+              <div className="text-2xl font-bold text-white mb-1">{statistics.totalEvents}</div>
+              <div className="text-xs text-gray-400">Total Events</div>
+            </motion.div>
 
-        {/* Phase Overview */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="bg-primary-surface border border-gray-800 rounded-xl p-6 mb-8"
-        >
-          <h2 className="text-xl font-bold text-text-light mb-4">Project Phases</h2>
-          <div className="flex flex-wrap gap-3">
-            {timelineData?.phases.map((phase) => (
-              <div
-                key={phase.id}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-700"
-                style={{ borderLeftColor: phase.color, borderLeftWidth: 4 }}
-              >
-                <span className="font-medium text-text-light">{phase.name}</span>
-                <span className="text-sm text-text-secondary">
-                  {formatDate(phase.startDate)} - {formatDate(phase.endDate)}
-                </span>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-[#132844] border border-blue-500/30 rounded-lg p-4 text-center"
+            >
+              <div className="flex items-center justify-center mb-1">
+                <Package className="w-4 h-4 text-blue-400 mr-1" />
+                <div className="text-2xl font-bold text-blue-400">{statistics.orders}</div>
               </div>
-            ))}
-          </div>
-        </motion.div>
+              <div className="text-xs text-gray-400">Orders</div>
+            </motion.div>
 
-        {/* Filter */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="flex items-center gap-4 mb-8"
-        >
-          <Filter className="w-5 h-5 text-text-secondary" />
-          <div className="flex flex-wrap gap-2">
-            {types.map((type) => (
-              <button
-                key={type}
-                onClick={() => setSelectedType(type)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  selectedType === type
-                    ? 'bg-cyan text-primary-bg'
-                    : 'bg-primary-surface text-text-secondary hover:text-text-light border border-gray-800'
-                }`}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-[#132844] border border-green-500/30 rounded-lg p-4 text-center"
+            >
+              <div className="flex items-center justify-center mb-1">
+                <CheckCircle2 className="w-4 h-4 text-green-400 mr-1" />
+                <div className="text-2xl font-bold text-green-400">{statistics.milestones}</div>
+              </div>
+              <div className="text-xs text-gray-400">Milestones</div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="bg-[#132844] border border-yellow-500/30 rounded-lg p-4 text-center"
+            >
+              <div className="flex items-center justify-center mb-1">
+                <AlertTriangle className="w-4 h-4 text-yellow-400 mr-1" />
+                <div className="text-2xl font-bold text-yellow-400">{statistics.challenges}</div>
+              </div>
+              <div className="text-xs text-gray-400">Challenges</div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="bg-[#132844] border border-cyan-500/30 rounded-lg p-4 text-center"
+            >
+              <div className="flex items-center justify-center mb-1">
+                <Sparkles className="w-4 h-4 text-cyan-400 mr-1" />
+                <div className="text-2xl font-bold text-cyan-400">{statistics.discoveries}</div>
+              </div>
+              <div className="text-xs text-gray-400">Discoveries</div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="bg-[#132844] border border-[#1e3a5f] rounded-lg p-4 text-center"
+            >
+              <div className="text-2xl font-bold text-white mb-1">{formatCurrency(statistics.totalCost)}</div>
+              <div className="text-xs text-gray-400">Investment</div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7 }}
+              className="bg-[#132844] border border-[#1e3a5f] rounded-lg p-4 text-center"
+            >
+              <div className="text-2xl font-bold text-white mb-1">{statistics.components}+</div>
+              <div className="text-xs text-gray-400">Components</div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+              className="bg-[#132844] border border-[#1e3a5f] rounded-lg p-4 text-center"
+            >
+              <div className="text-2xl font-bold text-white mb-1">{statistics.vendors}</div>
+              <div className="text-xs text-gray-400">Vendors</div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Main Content */}
+      <section className="py-12">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Column: Timeline and Events */}
+            <div className="lg:col-span-2 space-y-8">
+              {/* Filters */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
               >
-                {type.charAt(0).toUpperCase() + type.slice(1)}
-              </button>
-            ))}
-          </div>
-        </motion.div>
+                <EventFilters
+                  onFilterChange={setFilters}
+                  eventCounts={{
+                    total: events.length,
+                    filtered: filteredEvents.length,
+                  }}
+                />
+              </motion.div>
 
-        {/* Timeline */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="relative"
-        >
-          {/* Vertical Line */}
-          <div className="absolute left-8 md:left-1/2 top-0 bottom-0 w-0.5 bg-gray-800 transform md:-translate-x-1/2" />
+              {/* Timeline Visualization */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <TimelineComponent
+                  events={filteredEvents}
+                  onEventClick={handleEventClick}
+                  selectedEventId={selectedEventId}
+                />
+              </motion.div>
 
-          {/* Events */}
-          <div className="space-y-8">
-            {filteredEvents.map((event, index) => {
-              const IconComponent = typeIcons[event.type] || Calendar;
-              const isEven = index % 2 === 0;
+              {/* Event Cards */}
+              <div className="space-y-4">
+                <h2 className="text-2xl font-bold text-white mb-4">
+                  Event Details
+                  {filteredEvents.length !== events.length && (
+                    <Badge variant="outline" className="ml-3 border-cyan-500 text-cyan-400">
+                      {filteredEvents.length} filtered
+                    </Badge>
+                  )}
+                </h2>
 
-              return (
-                <motion.div
-                  key={event.id}
-                  initial={{ opacity: 0, x: isEven ? -20 : 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.4, delay: index * 0.05 }}
-                  className={`relative flex items-start gap-4 ${
-                    isEven ? 'md:flex-row' : 'md:flex-row-reverse'
-                  }`}
-                >
-                  {/* Date & Icon (Mobile) / Content (Desktop) */}
-                  <div className={`flex-1 ${isEven ? 'md:text-right' : 'md:text-left'}`}>
-                    <div className={`bg-primary-surface border border-gray-800 rounded-xl p-5 ml-16 md:ml-0 ${
-                      isEven ? 'md:mr-8' : 'md:ml-8'
-                    }`}>
-                      {/* Date Badge */}
-                      <div className={`flex items-center gap-2 mb-3 ${
-                        isEven ? 'md:justify-end' : ''
-                      }`}>
-                        <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium border ${
-                          typeColors[event.type] || 'bg-gray-700 text-text-secondary border-gray-600'
-                        }`}>
-                          <IconComponent className="w-3 h-3" />
-                          {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
-                        </span>
-                        <span className="text-sm text-text-secondary font-mono">
-                          {formatDate(event.date)}
-                        </span>
-                      </div>
-
-                      {/* Title */}
-                      <h3 className="text-lg font-bold text-text-light mb-2">
-                        {event.title}
-                      </h3>
-
-                      {/* Description */}
-                      <p className="text-text-secondary text-sm mb-3">
-                        {event.description}
-                      </p>
-
-                      {/* Meta */}
-                      <div className={`flex flex-wrap items-center gap-3 text-xs ${
-                        isEven ? 'md:justify-end' : ''
-                      }`}>
-                        {event.vendors && (
-                          <span className="text-text-secondary">
-                            Vendors: {event.vendors.join(', ')}
-                          </span>
-                        )}
-                        {event.value && (
-                          <span className="flex items-center gap-1 text-cyan font-semibold">
-                            <DollarSign className="w-3 h-3" />
-                            {formatCurrency(event.value)}
-                          </span>
-                        )}
-                        <span className="px-2 py-0.5 rounded bg-primary-accent/30 text-cyan">
-                          Phase {event.phase}
-                        </span>
-                      </div>
-                    </div>
+                {filteredEvents.length === 0 ? (
+                  <div className="bg-[#132844] border border-[#1e3a5f] rounded-lg p-12 text-center">
+                    <p className="text-gray-400">
+                      No events match your current filters. Try adjusting your selection.
+                    </p>
                   </div>
-
-                  {/* Center Icon */}
-                  <div className="absolute left-8 md:left-1/2 transform md:-translate-x-1/2 -translate-y-0">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                      event.type === 'milestone'
-                        ? 'bg-success'
-                        : event.type === 'procurement'
-                        ? 'bg-warning'
-                        : 'bg-cyan'
-                    }`}>
-                      <IconComponent className="w-4 h-4 text-primary-bg" />
-                    </div>
+                ) : (
+                  <div className="space-y-4">
+                    {filteredEvents.map((event, index) => (
+                      <div key={event.id} id={`event-${event.id}`}>
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                        >
+                          <TimelineEventCard
+                            event={event}
+                            isExpanded={selectedEventId === event.id}
+                          />
+                        </motion.div>
+                      </div>
+                    ))}
                   </div>
-
-                  {/* Spacer for desktop layout */}
-                  <div className="hidden md:block flex-1" />
-                </motion.div>
-              );
-            })}
-          </div>
-
-          {filteredEvents.length === 0 && (
-            <div className="text-center py-12 text-text-secondary">
-              No events match the selected filter
+                )}
+              </div>
             </div>
-          )}
-        </motion.div>
-      </Container>
+
+            {/* Right Column: Budget Chart (Sticky) */}
+            <div className="lg:col-span-1">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="lg:sticky lg:top-4"
+              >
+                <BudgetChart events={filteredEvents} />
+              </motion.div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
