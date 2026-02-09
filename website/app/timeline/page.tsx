@@ -31,7 +31,7 @@ export default function TimelinePage() {
     phase: 'all',
     vendor: 'all',
   });
-  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const [selectedEventId, setSelectedEventId] = useState<string | undefined>(undefined);
 
   const events = timelineEventsData as TimelineEvent[];
 

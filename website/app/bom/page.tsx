@@ -97,8 +97,9 @@ export default function BOMPage() {
     // Compute from items - handle phase as array or single value
     const phases: Record<string, number> = {};
     bomData.items.forEach(item => {
-      const itemPhases = Array.isArray((item as Record<string, unknown>).phase)
-        ? (item as Record<string, unknown>).phase as number[]
+      const itemRecord = item as unknown as Record<string, unknown>;
+      const itemPhases = Array.isArray(itemRecord.phase)
+        ? itemRecord.phase as number[]
         : [item.buildPhase];
 
       itemPhases.forEach((phase: number) => {
@@ -141,8 +142,8 @@ export default function BOMPage() {
     if (selectedPhase !== 'all') {
       const phaseNum = parseInt(selectedPhase);
       items = items.filter(item => {
-        const itemPhases = Array.isArray((item as Record<string, unknown>).phase)
-          ? (item as Record<string, unknown>).phase as number[]
+        const itemPhases = Array.isArray((item as unknown as Record<string, unknown>).phase)
+          ? (item as unknown as Record<string, unknown>).phase as number[]
           : [item.buildPhase];
         return itemPhases.includes(phaseNum);
       });
@@ -190,8 +191,8 @@ export default function BOMPage() {
       Description: item.description,
       Vendor: item.vendor,
       Category: item.category,
-      'Build Phase': Array.isArray((item as Record<string, unknown>).phase)
-        ? ((item as Record<string, unknown>).phase as number[]).join(', ')
+      'Build Phase': Array.isArray((item as unknown as Record<string, unknown>).phase)
+        ? ((item as unknown as Record<string, unknown>).phase as number[]).join(', ')
         : item.buildPhase,
       Quantity: item.quantity,
       'Unit Price': item.unitPrice,
@@ -341,8 +342,8 @@ export default function BOMPage() {
               .map(([phase, cost]) => {
                 const phaseNum = parseInt(phase.replace('Phase ', ''));
                 const itemsInPhase = bomData.items.filter(item => {
-                  const itemPhases = Array.isArray((item as Record<string, unknown>).phase)
-                    ? (item as Record<string, unknown>).phase as number[]
+                  const itemPhases = Array.isArray((item as unknown as Record<string, unknown>).phase)
+                    ? (item as unknown as Record<string, unknown>).phase as number[]
                     : [item.buildPhase];
                   return itemPhases.includes(phaseNum);
                 }).length;
@@ -579,8 +580,8 @@ export default function BOMPage() {
                     </td>
                     <td className="px-4 py-3 text-center">
                       <span className="px-2 py-1 rounded bg-cyan/20 text-cyan text-xs font-medium">
-                        {Array.isArray((item as Record<string, unknown>).phase)
-                          ? ((item as Record<string, unknown>).phase as number[]).join(', ')
+                        {Array.isArray((item as unknown as Record<string, unknown>).phase)
+                          ? ((item as unknown as Record<string, unknown>).phase as number[]).join(', ')
                           : item.buildPhase || '-'}
                       </span>
                     </td>

@@ -71,7 +71,7 @@ export default function CADPage() {
                 Complete system design for remote-scanning light sheet microscopy
               </p>
               <p className="text-lg text-text-secondary max-w-4xl leading-relaxed">
-                The rsLSM v1.1 is a complete redesign of Zeguan Wang's remote-scanning lightsheet
+                The rsLSM v1.1 is a complete redesign of Zeguan Wang&apos;s remote-scanning lightsheet
                 microscope for whole-brain voltage imaging in zebrafish. This page showcases CAD
                 visualizations from multiple angles, detailed subsystem views, and downloadable design files.
               </p>
@@ -343,7 +343,7 @@ export default function CADPage() {
                 </div>
               </div>
               <p className="text-text-secondary mb-6 max-w-2xl">
-                In a future update, we'll add an interactive 3D viewer where you can rotate, zoom,
+                In a future update, we&apos;ll add an interactive 3D viewer where you can rotate, zoom,
                 and measure the system directly in your browser. This will enable real-time
                 exploration of the microscope design without requiring CAD software.
               </p>
@@ -370,7 +370,7 @@ export default function CADPage() {
               <div className="border-b border-gray-700 pb-4">
                 <h3 className="font-semibold text-text-light mb-2">Original Design</h3>
                 <p className="text-sm text-text-secondary mb-2">
-                  This system is based on Zeguan Wang's remote-scanning lightsheet microscope
+                  This system is based on Zeguan Wang&apos;s remote-scanning lightsheet microscope
                   design, adapted for voltage imaging applications.
                 </p>
                 <a
