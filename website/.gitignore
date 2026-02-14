@@ -46,3 +46,6 @@ next-env.d.ts
 # full-table-design.stl
 # *.pdf
 # *.docx
+# next-agents-md
+.next-docs/
+AGENTS.md
